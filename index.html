@@ -89,43 +89,76 @@
     </div>
   </div>
 
-  <!-- Modal Xem Lại Băng Hình (Review Wrong Answers) -->
-  <div id="reviewModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-[150] hidden flex-col items-center justify-center p-4">
-    <div class="bg-slate-900 border-2 border-red-500 rounded-3xl shadow-[0_0_50px_rgba(239,68,68,0.3)] w-full max-w-3xl flex flex-col overflow-hidden animate-fadeIn">
-      <!-- Header -->
-      <div class="bg-slate-950 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
-        <div class="flex items-center space-x-3">
-          <i data-lucide="video" class="w-6 h-6 text-red-500"></i>
-          <h2 class="text-xl font-black text-white uppercase tracking-widest">Phân Tích Băng Hình</h2>
-        </div>
-        <button onclick="closeReviewModal()" class="text-slate-500 hover:text-red-500 transition">
-          <i data-lucide="x" class="w-6 h-6"></i>
+  <!-- Modal Xem Lại Băng Hình (Full Screen + Drawing Tools) -->
+  <div id="reviewModal" class="fixed inset-0 bg-slate-950 z-[150] hidden flex-col animate-fadeIn">
+    <!-- Header & Toolbar -->
+    <div class="bg-slate-900 px-4 md:px-6 py-3 border-b border-slate-800 flex justify-between items-center shadow-lg z-30">
+      <div class="flex items-center space-x-3 w-1/4 md:w-1/3">
+        <i data-lucide="video" class="w-6 h-6 text-red-500 hidden sm:block"></i>
+        <h2 class="text-sm md:text-lg font-black text-white uppercase tracking-widest hidden sm:block">Băng Hình</h2>
+      </div>
+
+      <!-- Drawing Toolbar -->
+      <div class="flex items-center space-x-1 md:space-x-2 bg-slate-950 border border-slate-800 p-1 md:p-1.5 rounded-xl shadow-inner">
+        <button class="w-6 h-6 rounded-full bg-red-500 ring-2 ring-white color-btn shadow-sm" data-color="#ef4444"></button>
+        <button class="w-6 h-6 rounded-full bg-blue-500 opacity-50 hover:opacity-100 color-btn shadow-sm" data-color="#3b82f6"></button>
+        <button class="w-6 h-6 rounded-full bg-emerald-400 opacity-50 hover:opacity-100 color-btn shadow-sm" data-color="#34d399"></button>
+        <button class="w-6 h-6 rounded-full bg-yellow-400 opacity-50 hover:opacity-100 color-btn shadow-sm" data-color="#facc15"></button>
+        <button class="w-6 h-6 rounded-full bg-white opacity-50 hover:opacity-100 color-btn shadow-sm" data-color="#ffffff"></button>
+        
+        <div class="w-px h-6 bg-slate-700 mx-1 md:mx-2"></div>
+        
+        <button class="p-1.5 md:p-2 bg-slate-700 rounded-lg text-white tool-btn shadow-sm" data-tool="pen" title="Bút vẽ tự do"><i data-lucide="pen" class="w-4 h-4 md:w-5 md:h-5"></i></button>
+        <button class="p-1.5 md:p-2 hover:bg-slate-800 rounded-lg text-slate-400 tool-btn transition" data-tool="line" title="Kẻ đường thẳng"><i data-lucide="minus" class="w-4 h-4 md:w-5 md:h-5"></i></button>
+        <button class="p-1.5 md:p-2 hover:bg-slate-800 rounded-lg text-slate-400 tool-btn transition" data-tool="rect" title="Vẽ khung chữ nhật"><i data-lucide="square" class="w-4 h-4 md:w-5 md:h-5"></i></button>
+        <button class="p-1.5 md:p-2 hover:bg-slate-800 rounded-lg text-slate-400 tool-btn transition" data-tool="eraser" title="Cục tẩy"><i data-lucide="eraser" class="w-4 h-4 md:w-5 md:h-5"></i></button>
+        
+        <div class="w-px h-6 bg-slate-700 mx-1 md:mx-2"></div>
+        
+        <button class="p-1.5 md:p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition" onclick="clearCanvas()" title="Xóa toàn bộ bảng"><i data-lucide="trash-2" class="w-4 h-4 md:w-5 md:h-5"></i></button>
+      </div>
+
+      <div class="w-1/4 md:w-1/3 flex justify-end">
+        <button onclick="closeReviewModal()" class="text-slate-400 hover:text-red-500 bg-slate-800 hover:bg-slate-700 p-2 rounded-lg transition">
+          <i data-lucide="x" class="w-5 h-5 md:w-6 md:h-6"></i>
         </button>
       </div>
+    </div>
+    
+    <!-- Content Area with Canvas Overlay -->
+    <div id="reviewContentArea" class="flex-1 relative bg-slate-900 bg-grid overflow-hidden flex flex-col justify-center items-center p-4 md:p-12">
       
-      <!-- Content -->
-      <div class="p-6 md:p-8 flex-1 flex flex-col justify-center items-center text-center min-h-[350px]">
-        <div class="mb-4 inline-block bg-red-950 border border-red-800 text-red-400 px-4 py-1.5 rounded-full text-sm font-bold tracking-widest uppercase">
+      <!-- Text content (Behind canvas, non-interactive to allow drawing over it) -->
+      <div class="z-10 flex flex-col items-center justify-center pointer-events-none w-full max-w-5xl">
+         <div class="mb-4 inline-block bg-red-950/90 border border-red-800 text-red-400 px-6 py-2 rounded-full text-xs md:text-sm font-bold tracking-widest uppercase shadow-lg backdrop-blur">
           Mục tiêu bị hỏng nhiều nhất
         </div>
-        <h3 id="reviewQuestionText" class="text-xl md:text-3xl font-bold text-white mb-8 leading-relaxed w-full"></h3>
-        
-        <div class="flex items-center justify-center space-x-3 text-yellow-500 font-black text-2xl bg-slate-950 px-6 py-4 rounded-2xl border border-yellow-500/30">
-          <i data-lucide="users" class="w-8 h-8"></i>
-          <span><span id="reviewWrongCount" class="text-4xl text-white">0</span> Tuyển thủ chọn sai</span>
+        <div class="bg-slate-950/90 p-8 md:p-12 rounded-3xl border border-slate-800 w-full shadow-2xl backdrop-blur-md">
+           <h3 id="reviewQuestionText" class="text-xl md:text-4xl font-bold text-white mb-10 leading-relaxed text-center"></h3>
+           
+           <div class="flex items-center justify-center space-x-3 text-yellow-500 font-black text-xl md:text-3xl bg-slate-900 px-8 py-5 rounded-2xl border border-yellow-500/30 mx-auto w-max shadow-inner">
+            <i data-lucide="users" class="w-8 h-8 md:w-10 md:h-10"></i>
+            <span><span id="reviewWrongCount" class="text-4xl md:text-5xl text-white">0</span> Tuyển thủ hỏng</span>
+          </div>
         </div>
       </div>
 
-      <!-- Footer / Navigation -->
-      <div class="bg-slate-950 px-6 py-4 border-t border-slate-800 flex justify-between items-center">
-        <button onclick="prevReviewSlide()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold flex items-center transition">
-          <i data-lucide="chevron-left" class="w-5 h-5 mr-1"></i> Trước
-        </button>
-        <span id="reviewSlideCounter" class="text-slate-400 font-mono font-bold tracking-widest text-lg">1 / 5</span>
-        <button onclick="nextReviewSlide()" class="px-4 py-2.5 bg-red-600/80 hover:bg-red-500 text-white rounded-xl font-bold flex items-center transition shadow-[0_0_15px_rgba(239,68,68,0.4)]">
-          Sau <i data-lucide="chevron-right" class="w-5 h-5 ml-1"></i>
-        </button>
+      <!-- Drawing Canvas -->
+      <canvas id="reviewCanvas" class="absolute inset-0 w-full h-full cursor-crosshair z-20 touch-none"></canvas>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="bg-slate-900 px-6 py-4 border-t border-slate-800 flex justify-between items-center shadow-[0_-10px_30px_rgba(0,0,0,0.5)] z-30">
+      <button onclick="prevReviewSlide()" class="px-4 py-2 md:px-6 md:py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold flex items-center transition shadow-md text-sm md:text-base">
+        <i data-lucide="chevron-left" class="w-4 h-4 md:w-5 md:h-5 mr-1 md:mr-2"></i> Trở Lại
+      </button>
+      <div class="flex flex-col items-center">
+          <span class="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-1">Băng hình</span>
+          <span id="reviewSlideCounter" class="text-red-500 font-mono font-black tracking-widest text-xl md:text-2xl">1 / 5</span>
       </div>
+      <button onclick="nextReviewSlide()" class="px-4 py-2 md:px-6 md:py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold flex items-center transition shadow-[0_0_15px_rgba(239,68,68,0.4)] text-sm md:text-base">
+        Tiếp Theo <i data-lucide="chevron-right" class="w-4 h-4 md:w-5 md:h-5 ml-1 md:ml-2"></i>
+      </button>
     </div>
   </div>
 
@@ -604,6 +637,15 @@
     let wrongQuestionsList = [];
     let currentReviewIdx = 0;
 
+    // Canvas Tools State
+    const canvas = document.getElementById('reviewCanvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let currentTool = 'pen';
+    let currentColor = '#ef4444'; // Mặc định bút đỏ
+    let startX, startY;
+    let snapshot;
+
     // 3. TIỆN ÍCH
     const $ = (id) => document.getElementById(id);
     const show = (el) => el && el.classList.remove('hidden');
@@ -670,7 +712,111 @@
       return array;
     }
 
-    // --- JS CHO PHÂN TÍCH BĂNG HÌNH (REVIEW MISTAKES) ---
+    // --- JS CHO PHÂN TÍCH BĂNG HÌNH & CANVAS DRAWING ---
+    function initCanvas() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+    }
+
+    const getMousePos = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+            x: clientX - rect.left,
+            y: clientY - rect.top
+        };
+    };
+
+    const startDraw = (e) => {
+        isDrawing = true;
+        const pos = getMousePos(e);
+        startX = pos.x;
+        startY = pos.y;
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    };
+
+    const drawing = (e) => {
+        if (!isDrawing) return;
+        e.preventDefault(); 
+        const pos = getMousePos(e);
+
+        if (currentTool === 'pen' || currentTool === 'eraser') {
+            ctx.strokeStyle = currentTool === 'eraser' ? 'rgba(0,0,0,1)' : currentColor;
+            ctx.globalCompositeOperation = currentTool === 'eraser' ? 'destination-out' : 'source-over';
+            ctx.lineWidth = currentTool === 'eraser' ? 30 : 4;
+            
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+        } else if (currentTool === 'line' || currentTool === 'rect') {
+            ctx.putImageData(snapshot, 0, 0);
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            if(currentTool === 'line'){
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(pos.x, pos.y);
+            } else if(currentTool === 'rect'){
+                ctx.rect(startX, startY, pos.x - startX, pos.y - startY);
+            }
+            ctx.stroke();
+        }
+    };
+
+    const stopDraw = () => {
+        if(isDrawing) {
+           isDrawing = false;
+           ctx.beginPath();
+        }
+    };
+
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', drawing);
+    canvas.addEventListener('mouseup', stopDraw);
+    canvas.addEventListener('mouseout', stopDraw);
+
+    canvas.addEventListener('touchstart', startDraw, {passive: false});
+    canvas.addEventListener('touchmove', drawing, {passive: false});
+    canvas.addEventListener('touchend', stopDraw);
+
+    // Toolbar Listeners
+    document.querySelectorAll('.color-btn').forEach(btn => {
+        btn.onclick = (e) => {
+            document.querySelectorAll('.color-btn').forEach(b => {
+                b.classList.remove('ring-2', 'ring-white');
+                b.classList.add('opacity-50');
+            });
+            btn.classList.add('ring-2', 'ring-white');
+            btn.classList.remove('opacity-50');
+            currentColor = btn.dataset.color;
+            if(currentTool === 'eraser') {
+               document.querySelector('[data-tool="pen"]').click();
+            }
+        }
+    });
+
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.tool-btn').forEach(b => {
+                b.classList.remove('bg-slate-700', 'text-white');
+                b.classList.add('text-slate-400');
+            });
+            btn.classList.add('bg-slate-700', 'text-white');
+            btn.classList.remove('text-slate-400');
+            currentTool = btn.dataset.tool;
+        }
+    });
+
+    window.clearCanvas = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    };
+
     window.openReviewModal = () => {
       if (currentFilterCode === 'ALL') {
           alert('Vui lòng chọn một Phòng Đấu cụ thể (bộ lọc bên phải) để xem phân tích băng hình!');
@@ -706,17 +852,26 @@
 
       currentReviewIdx = 0;
       show($('reviewModal'));
+      
+      // Initialize Canvas size after modal is shown to get correct dimensions
+      setTimeout(() => {
+          initCanvas();
+          window.addEventListener('resize', initCanvas);
+      }, 50);
+      
       window.renderReviewSlide();
       lucide.createIcons();
     };
 
     window.closeReviewModal = () => {
       hide($('reviewModal'));
+      window.removeEventListener('resize', initCanvas);
     };
 
     window.prevReviewSlide = () => {
       if(currentReviewIdx > 0) {
         currentReviewIdx--;
+        window.clearCanvas();
         window.renderReviewSlide();
       }
     };
@@ -724,6 +879,7 @@
     window.nextReviewSlide = () => {
       if(currentReviewIdx < wrongQuestionsList.length - 1) {
         currentReviewIdx++;
+        window.clearCanvas();
         window.renderReviewSlide();
       }
     };
